@@ -48,6 +48,7 @@ int minSeq(int gimatryVal){
     word = (char *) malloc(WORD *sizeof(char));
     int nextIndex = 0;
     int true = nextChar == '~' ? 0 : 1;
+    int first = 1;
     //printf("true is : %d\n", true);
     while(true == 1){
         if(nextChar == '\n' || nextChar == '\t' || nextChar == ' ' || nextChar == '~'){
@@ -58,14 +59,20 @@ int minSeq(int gimatryVal){
             //printf("word passed to gimatryValue is %s\n: ", (word));
             int gimatSeqVal = gimatryValue(word);
             if(gimatSeqVal == gimatryVal){
-                printf("%s\n",word);
+                if(first == 1){
+                    printf("%s",word); first = 0 ;
+                }
+                else{
+                    printf("~%s",word);
+                }
             }
             nextIndex=0;
             word = (char *)realloc(word, WORD * sizeof(char));
         }
-        //printf("current char is : %c\n",nextChar);
-        if(nextChar != '~')
+        else{
+            //printf("current char is : %c\n",nextChar);
             word[nextIndex++] = nextChar;
+        }
         nextChar = fgetc(filePointer);
     }
     free(word);
@@ -133,41 +140,73 @@ int atBash(char * word){
 }
 
 int minSeqWithEmpty(char *wordABC){
-
-    int asciWord[88] = { 0 }, *asciNextSeq = (int *) malloc(88 * sizeof(int));
+    //printf("received word : %s\n", wordABC);
+    int *asciWord = (int *) calloc(sizeof(int), 88), *asciNextSeq = (int *) calloc(sizeof(int), 88);
     char nextChar = wordABC[0];
-    int charVal, wordLen=0;
+    int charVal, wordLen=0, index=1;
+    // init the word's asci value chart
+    if(nextChar == '\0')
+        return 0;
     while(nextChar != '\0'){
         charVal = (int) nextChar;
         if(charVal >= 40 && charVal <= 126){
             asciWord[charVal] +=1;
             wordLen+=1;
         }
+        //printf("got nextChar of value of %c\n", nextChar);
+        nextChar = wordABC[index++];
+        
     }
-    if(nextChar == '\0')
-        return 0;
     nextChar = fgetc(filePointer);
+    //printf("allocating new memory\n");
     char *newSeq = (char *) malloc(wordLen * sizeof(char));
-    int index =0;
+    //printf("allocated new memory space for the new minimal sequence\n");
+    index =0;
     int lenSeq=0;
+    int first = 1;
+    // read the text and get the minimal sequences
+    // test if the asci values of the minimal sequences equal to the
+    // word's asci chart by making its own chart and just checking if 
+    // the word's asci chart already has this character, print only if
+    // the word's length is equal to the minimal sequence length
     while(nextChar != '~'){
         if(lenSeq == wordLen){
-            printf("%s\n", newSeq);
+            newSeq[index] = '\0';
+            lenSeq = 0;
+            if(first == 1){
+                printf("%s", newSeq); first = 0 ;
+            }
+            else{
+                printf("~%s", newSeq);
+            }
         }
         if(nextChar != ' ' && nextChar != '\n' && nextChar != '\t'){
             charVal = (int)nextChar;
             if(asciWord[charVal] > asciNextSeq[charVal]){
+                //printf("asciWord at index %c, is : %d\n", charVal, asciWord[charVal]);
+                //printf("asciNextSeq at index %c, is : %d\n ", charVal, asciNextSeq[charVal]);
                 asciNextSeq[charVal] +=1;
                 newSeq[index++] = nextChar;
                 lenSeq+=1;
+                //printf("incrementing value by 1 to %c\n",nextChar);
             }
             else{
                 lenSeq = 0; index=0;
-                asciNextSeq = (int *)realloc(asciNextSeq, 88 * sizeof(int));
-                newSeq = (char *) realloc(newSeq,wordLen*sizeof(char));
+               // printf("reallocating memory of sequence's asci chart\n");
+                free(asciNextSeq);
+                asciNextSeq = (int *)calloc(sizeof(int), 88);
+                //printf("reallocating memory of the sequence itself\n");
+                free(newSeq);
+                newSeq = (char *) calloc(sizeof(char), wordLen);
             }
         }
+        else{
+            newSeq[index++] = nextChar;
+        }
+        nextChar = fgetc(filePointer);
     }
+    free(asciNextSeq);
+    free(newSeq);
     return 0;
 }
 
@@ -210,15 +249,18 @@ int main(int argc, char* argv[]){
     }while(word[index] != '\0');
     //printf("gimatry value of the word is : %d\n ", gimatryWord);
     //enter code here:
+    printf("Gematria Sequences: ");
     minSeq(gimatryWord);
 
-    // reset to point to the first text char
-    filePointer = fopen(argv[1],"r");
-    while(fgetc(filePointer) != '\n'){};
-    atBash(word);
+    // // reset to point to the first text char
+    // filePointer = fopen(argv[1],"r");
+    // while(fgetc(filePointer) != '\n'){};
+    printf("\nAtbash Sequences: ");
+    // atBash(word);
 
     filePointer = fopen(argv[1],"r");
     while(fgetc(filePointer) != '\n'){};
+    printf("\nAnagram Sequences: ");
     minSeqWithEmpty(word);
 
     fclose(filePointer);
