@@ -58,7 +58,7 @@ int minSeq(int gimatryVal){
             //printf("word passed to gimatryValue is %s\n: ", (word));
             int gimatSeqVal = gimatryValue(word);
             if(gimatSeqVal == gimatryVal){
-                printf("%s",word);
+                printf("%s\n",word);
             }
             nextIndex=0;
             word = (char *)realloc(word, WORD * sizeof(char));
@@ -67,8 +67,6 @@ int minSeq(int gimatryVal){
         if(nextChar != '~')
             word[nextIndex++] = nextChar;
         nextChar = fgetc(filePointer);
-        
-        
     }
     free(word);
     //printf("ended minSeq\n");
@@ -77,9 +75,60 @@ int minSeq(int gimatryVal){
 
 }
 
-int atBash(int gimatryVal){
+int atBash(char * word){
+    char c = word[0];
+    int *wordLength = (int *) malloc(sizeof(int));
+    *wordLength = 0;
+    int  index=0;
+    while(c != '\0'){
+        *(wordLength)+=1;
+        c = word[++index];
+    }
+    char * atbashWord = (char *) malloc(*(wordLength) * sizeof(char));
+    char * reverseAtbashWord = (char *) malloc(*(wordLength) * sizeof(char));
+    int currentIndex =0;
+    int currCharValue;
+    while(word[currentIndex] != '\0'){
+        currCharValue = (int)word[currentIndex];
+        if(97 <= currCharValue && currCharValue <= 122){
+            atbashWord[currentIndex] = (char) (122 - (currCharValue - 97));
+            reverseAtbashWord[*(wordLength)-currentIndex++] = (char) (122 - (currCharValue - 97));
+            printf("atbash is : %s\n", atbashWord);
+            printf("reverse atbash is : %s\n",reverseAtbashWord);
+        }
+        else if(65 <= currCharValue && currCharValue <= 90){
+            atbashWord[currentIndex] = (char) (90 - (currCharValue - 65));
+            reverseAtbashWord[*(wordLength)-currentIndex++] = (char) (90 - (currCharValue - 65));
+            printf("atbash is : %s\n", atbashWord);
+            printf("reverse atbash is : %s\n",reverseAtbashWord);
+        }
+    }
+    char nextChar = getc(filePointer);
+    int index1=0,index2=0;
 
-
+    while(nextChar != '~'){
+        if(nextChar != ' ' || nextChar != '\n' || nextChar != '\t'){
+            if(nextChar == atbashWord[index1]){
+                index1++;
+            }
+            else{
+                index1 = 0;
+            }
+            if(nextChar == reverseAtbashWord[index2]){
+                index2++;
+            }
+            else{
+                index2 = 0;
+            }
+        }
+        if(index1 == *(wordLength)){
+            printf("%s~",atbashWord);
+        }
+        if(index2 == *(wordLength)){
+            printf("%s~",reverseAtbashWord);
+        }
+        nextChar = getc(filePointer);
+    }
     return 0;
 }
 
@@ -131,8 +180,16 @@ int main(int argc, char* argv[]){
     //printf("gimatry value of the word is : %d\n ", gimatryWord);
     //enter code here:
     minSeq(gimatryWord);
-    atBash(gimatryWord);
+
+    // reset to point to the first text char
+    filePointer = fopen(argv[1],"r");
+    while(fgetc(filePointer) != '\n'){};
+    atBash(word);
+
+    filePointer = fopen(argv[1],"r");
+    while(fgetc(filePointer) != '\n'){};
     minSeqWithEmpty(abc);
+
     fclose(filePointer);
     return 0;
 }

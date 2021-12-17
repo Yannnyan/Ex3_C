@@ -15,7 +15,7 @@ int minSeq(int gimatryVal);
  * This function prints all the minimal sequences with the same gimatry values as the word received 
  * or all  the minimal sequences which reversed "atbash" have the same gimatry values as the word received.
  */
-int atBash(int gimatryVal);
+int atBash(char * word);
 /** @brief
  * This function prints all the minimal sequences which are built by the same characters as the word received
  * and ignores to empty chars but still prints them 
