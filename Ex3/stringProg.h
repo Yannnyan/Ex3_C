@@ -20,4 +20,4 @@ int atBash(char * word);
  * This function prints all the minimal sequences which are built by the same characters as the word received
  * and ignores to empty chars but still prints them 
  */
-int minSeqWithEmpty(int *wordABC);
+int minSeqWithEmpty(char *word);

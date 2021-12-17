@@ -132,11 +132,45 @@ int atBash(char * word){
     return 0;
 }
 
-int minSeqWithEmpty(int *wordABC){
+int minSeqWithEmpty(char *wordABC){
+
+    int asciWord[88] = { 0 }, *asciNextSeq = (int *) malloc(88 * sizeof(int));
+    char nextChar = wordABC[0];
+    int charVal, wordLen=0;
+    while(nextChar != '\0'){
+        charVal = (int) nextChar;
+        if(charVal >= 40 && charVal <= 126){
+            asciWord[charVal] +=1;
+            wordLen+=1;
+        }
+    }
+    if(nextChar == '\0')
+        return 0;
+    nextChar = fgetc(filePointer);
+    char *newSeq = (char *) malloc(wordLen * sizeof(char));
+    int index =0;
+    int lenSeq=0;
+    while(nextChar != '~'){
+        if(lenSeq == wordLen){
+            printf("%s\n", newSeq);
+        }
+        if(nextChar != ' ' && nextChar != '\n' && nextChar != '\t'){
+            charVal = (int)nextChar;
+            if(asciWord[charVal] > asciNextSeq[charVal]){
+                asciNextSeq[charVal] +=1;
+                newSeq[index++] = nextChar;
+                lenSeq+=1;
+            }
+            else{
+                lenSeq = 0; index=0;
+                asciNextSeq = (int *)realloc(asciNextSeq, 88 * sizeof(int));
+                newSeq = (char *) realloc(newSeq,wordLen*sizeof(char));
+            }
+        }
+    }
     return 0;
-
-
 }
+
 int main(int argc, char* argv[]){
     // init word
     if(argc == 2){filePointer = fopen(argv[1], "r");}
@@ -161,19 +195,16 @@ int main(int argc, char* argv[]){
     // calculate gimatric values of the word
 
     int gimatryWord = 0;
-    int abc[52];
     index = 0;
     int charVal;
     do {
         charVal = (int) word[index++];
         if((charVal > 96 && charVal < 123)){
             // increment small letter
-            abc[charVal - 97] +=1;
             gimatryWord += (charVal-96);
         }
         else if(charVal > 64 && charVal < 91){
             // increment big letter
-            abc[charVal -65 + 26] +=1;
             gimatryWord += (charVal - 65);
         }
     }while(word[index] != '\0');
@@ -188,7 +219,7 @@ int main(int argc, char* argv[]){
 
     filePointer = fopen(argv[1],"r");
     while(fgetc(filePointer) != '\n'){};
-    minSeqWithEmpty(abc);
+    minSeqWithEmpty(word);
 
     fclose(filePointer);
     return 0;
