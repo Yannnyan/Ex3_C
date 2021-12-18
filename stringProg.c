@@ -4,7 +4,7 @@
 #define WORD 30
 #define TXT 1024
 // read from a file here:
-FILE *filePointer;
+FILE *filePointer, *outPointer;
 
 char *retMinSeq(){
     char * minseq;
@@ -90,10 +90,10 @@ int minSeq(int gimatryVal,char * text){
             if(GimatryWordVal == gimatryVal){
                 //printf("printing the word\n");
                 if(first == 1){
-                    printf("%s", word);first=0;
+                    fprintf(outPointer,"%s", word);first=0;
                 }
                 else
-                    printf("~%s", word);
+                    fprintf(outPointer,"~%s", word);
                 free(word);
                 word = (char *)calloc(sizeof(char), WORD);
                 wordIndex=0;
@@ -183,18 +183,18 @@ int atBash(char * word, char * text){
         }
         if(index1 == (wordLength)){
             if(first == 1){
-                printf("%s",atbashWord);first = 0;
+                fprintf(outPointer,"%s",atbashWord);first = 0;
             }
             else{
-                printf("~%s", atbashWord);
+                fprintf(outPointer,"~%s", atbashWord);
             }
         }
         if(index2 == (wordLength)){
             if(first == 1){
-                printf("%s",reverseAtbashWord);first = 0;
+                fprintf(outPointer,"%s",reverseAtbashWord);first = 0;
             }
             else{
-                printf("~%s", reverseAtbashWord);
+                fprintf(outPointer,"~%s", reverseAtbashWord);
             }
         }
         nextChar = text[currentCharIndex++];
@@ -263,10 +263,10 @@ int minSeqWithEmpty(char *wordABC, char * text){
             newSeq[index] = '\0';
             lenSeq = 0;
             if(first == 1){
-                printf("%s", newSeq); first = 0 ;
+                fprintf(outPointer,"%s", newSeq); first = 0 ;
             }
             else{
-                printf("~%s", newSeq);
+                fprintf(outPointer,"~%s", newSeq);
             }
             free(asciNextSeq);
             asciNextSeq = (int *)calloc(sizeof(int), 143);
@@ -281,6 +281,7 @@ int minSeqWithEmpty(char *wordABC, char * text){
 int main(int argc, char* argv[]){
     // init word
     filePointer = stdin;
+    outPointer = stdout;
     char word[(WORD * sizeof(char))];
     char nextChar = fgetc(filePointer);
     char text[TXT], text1[TXT], text2[TXT];
@@ -324,19 +325,19 @@ int main(int argc, char* argv[]){
     //printf("gimatry value of the word is : %d\n ", gimatryWord);
     //enter code here:
     //filePointer = fopen(argv[1],"r");
-    printf("Gematria Sequences: ");
+    fprintf(outPointer,"Gematria Sequences: ");
     minSeq(gimatryWord,text);
     //printf("%c",fgetc(filePointer));
 
     // reset to point to the first text char
     //filePointer = stdin;
     //while(fgetc(filePointer) != '\n'){};
-    printf("\nAtbash Sequences: ");
+    fprintf(outPointer,"\nAtbash Sequences: ");
     atBash(word,text1);
 
     //filePointer = stdin;
     //while(fgetc(filePointer) != '\n'){};
-    printf("\nAnagram Sequences: ");
+    fprintf(outPointer,"\nAnagram Sequences: ");
     minSeqWithEmpty(word,text2);
 
     fclose(filePointer);
