@@ -83,56 +83,82 @@ int minSeq(int gimatryVal){
 }
 
 int atBash(char * word){
+    //printf("word receive is : %s\n", word );
     char c = word[0];
-    int *wordLength = (int *) malloc(sizeof(int));
-    *wordLength = 0;
+    int wordLength = 0;
     int  index=0;
+    // get the word's length
     while(c != '\0'){
-        *(wordLength)+=1;
+        wordLength+=1;
         c = word[++index];
     }
-    char * atbashWord = (char *) malloc(*(wordLength) * sizeof(char));
-    char * reverseAtbashWord = (char *) malloc(*(wordLength) * sizeof(char));
+    //printf("The length of the word is : %d\n", wordLength);
+    //printf("allocating memory for atbashWord\n");
+    char * atbashWord = (char *) malloc((wordLength+1) * sizeof(char));
+    //printf("allocating memory for reverseAtbashWord\n");
+    char * reverseAtbashWord = (char *) malloc((wordLength+1) * sizeof(char));
     int currentIndex =0;
     int currCharValue;
     while(word[currentIndex] != '\0'){
         currCharValue = (int)word[currentIndex];
         if(97 <= currCharValue && currCharValue <= 122){
             atbashWord[currentIndex] = (char) (122 - (currCharValue - 97));
-            reverseAtbashWord[*(wordLength)-currentIndex++] = (char) (122 - (currCharValue - 97));
-            printf("atbash is : %s\n", atbashWord);
-            printf("reverse atbash is : %s\n",reverseAtbashWord);
+            currentIndex+=1;
+            //printf("atbash is : %s\n", atbashWord);
         }
         else if(65 <= currCharValue && currCharValue <= 90){
             atbashWord[currentIndex] = (char) (90 - (currCharValue - 65));
-            reverseAtbashWord[*(wordLength)-currentIndex++] = (char) (90 - (currCharValue - 65));
-            printf("atbash is : %s\n", atbashWord);
-            printf("reverse atbash is : %s\n",reverseAtbashWord);
+            currentIndex+=1;
+            //printf("atbash is : %s\n", atbashWord);
         }
     }
+    atbashWord[currentIndex] = '\0';
+    reverseAtbashWord[currentIndex] = '\0';
+    currentIndex = wordLength - 1;
+    index =0;
+    while(atbashWord[index] != '\0'){
+        reverseAtbashWord[currentIndex--] = atbashWord[index++];
+    }
+    //printf("reverse atbash is : %s\n", reverseAtbashWord);
     char nextChar = getc(filePointer);
-    int index1=0,index2=0;
+    int index1=0,index2=0, first = 1;
 
     while(nextChar != '~'){
         if(nextChar != ' ' || nextChar != '\n' || nextChar != '\t'){
             if(nextChar == atbashWord[index1]){
                 index1++;
+               // printf("incrementing index1 by 1 for char : %c\n", nextChar);
             }
             else{
                 index1 = 0;
+                //printf("resetting index1 by 1 for char : %c\n", nextChar);
             }
             if(nextChar == reverseAtbashWord[index2]){
                 index2++;
+                //printf("incrementing index2 by 1 for char : %c\n", nextChar);
             }
             else{
+                //printf("resetting index2 by 1 for char : %c\n", nextChar);
                 index2 = 0;
             }
         }
-        if(index1 == *(wordLength)){
-            printf("%s~",atbashWord);
+        if(index1 == (wordLength)){
+            if(first == 1){
+                printf("%s",atbashWord);
+                first =0;
+            }
+            else{
+                printf("~%s",atbashWord);
+            }
         }
-        if(index2 == *(wordLength)){
-            printf("%s~",reverseAtbashWord);
+        if(index2 == (wordLength)){
+            if(first == 1){
+                printf("%s",reverseAtbashWord);
+                first =0;
+            }
+            else{
+                printf("~%s",reverseAtbashWord);
+            }
         }
         nextChar = getc(filePointer);
     }
@@ -252,11 +278,11 @@ int main(int argc, char* argv[]){
     printf("Gematria Sequences: ");
     minSeq(gimatryWord);
 
-    // // reset to point to the first text char
-    // filePointer = fopen(argv[1],"r");
-    // while(fgetc(filePointer) != '\n'){};
+    // reset to point to the first text char
+    filePointer = fopen(argv[1],"r");
+    while(fgetc(filePointer) != '\n'){};
     printf("\nAtbash Sequences: ");
-    // atBash(word);
+    atBash(word);
 
     filePointer = fopen(argv[1],"r");
     while(fgetc(filePointer) != '\n'){};
