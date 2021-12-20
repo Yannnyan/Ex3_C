@@ -205,76 +205,125 @@ int atBash(char * word, char * text){
 }
 
 int minSeqWithEmpty(char *wordABC, char * text){
-    //printf("received word : %s\n", wordABC);
-    int currentCharIndex=0;
-    int *asciWord = (int *) calloc(sizeof(int), 143), *asciNextSeq = (int *) calloc(sizeof(int), 143);
-    char nextChar = wordABC[0];
-    int charVal, wordLen=0, index=1;
-    // init the word's asci value chart
-    if(nextChar == '\0')
-        return 0;
-    while(nextChar != '\0'){
-        charVal = (int) nextChar;
-        if(charVal >= 33 && charVal <= 175){
-            asciWord[charVal-33] +=1;
-            wordLen+=1;
+    int asciWordTable[92]={0}, asciSeqTable[92]={0};
+    char nextChar;
+    int nextCharValue, nextIndex=1, wordLen = 0;;
+    nextChar = wordABC[0];
+    if(nextChar == '\0')return 0;
+    // initialize the asci values for the word received
+    while(nextChar != '\0' && nextChar != '~'){
+        wordLen +=1;
+        nextCharValue = (int) nextChar;
+        if(nextCharValue > 32 && nextCharValue < 126){
+            asciWordTable[nextCharValue-33] +=1;
         }
-        //printf("got nextChar of value of %c\n", nextChar);
-        nextChar = wordABC[index++];
-        
+        nextChar = wordABC[nextIndex++];
     }
-    nextChar = text[currentCharIndex++];
-    //printf("allocating new memory\n");
-    char *newSeq = (char *) malloc(wordLen * sizeof(char));
-    //printf("allocated new memory space for the new minimal sequence\n");
-    index =0;
-    int lenSeq=0;
-    int first = 1;
-    // read the text and get the minimal sequences
-    // test if the asci values of the minimal sequences equal to the
-    // word's asci chart by making its own chart and just checking if 
-    // the word's asci chart already has this character, print only if
-    // the word's length is equal to the minimal sequence length
-    while(nextChar != '~'){
-        if(nextChar != ' ' && nextChar != '\n' && nextChar != '\t'){
-            charVal = (int)nextChar;
-            // printf("current char is : %c\n", nextChar);
-            // printf("asciWord value at : %d, is : %d   ", charVal-33, asciWord[charVal-33]);
-            // printf("asci value as aciNextSeq at %d, is : %d\n", charVal-33, asciNextSeq[charVal-33]);
-            if(asciWord[charVal-33] > asciNextSeq[charVal-33]){
-                // printf("asciWord at index %c, is : %d\n", charVal, asciWord[charVal-33]);
-                // printf("asciNextSeq at index %c, is : %d\n ", charVal, asciNextSeq[charVal-33]);
-                asciNextSeq[charVal-33] +=1;
-                newSeq[index++] = nextChar;
-                lenSeq+=1;
-                //printf("incrementing value by 1 to %c\n",nextChar);
+    
+    char minSeq[wordLen];
+    int minSeqIndex = 0, minSeqLength = 0, first =1;
+    nextChar = text[0]; nextIndex = 1;
+    
+    for(int i=0; text[i] != '~'; i++){
+        nextCharValue = (int) text[i];
+        if(nextCharValue > 32)
+        for(int j = i; text[j] != '~'; j++){
+            nextCharValue = (int) text[j];
+            minSeq[minSeqIndex] = '\0';
+            if(minSeqLength == wordLen){
+                //fprintf(outPointer,"%d\n", i);
+                if(first == 1){
+                    fprintf(outPointer,"%s", minSeq);first=0;
+                }
+                else{
+                    fprintf(outPointer,"~%s",minSeq);
+                }
+                for(int k = 0; k < strlen(minSeq); k++){
+                    if((int)minSeq[k] > 32){
+                        asciSeqTable[(int)minSeq[k] - 33] = 0;
+                    }
+                }
+
+                minSeqLength = 0;
+                minSeqIndex = 0;
+            }
+            if(nextCharValue > 32){
+            if(asciWordTable[nextCharValue-33] > asciSeqTable[nextCharValue-33]){
+                asciSeqTable[nextCharValue-33]+=1;
+                minSeq[minSeqIndex++] = text[j];
+                minSeqLength+=1;
             }
             else{
-                lenSeq = 0; index=0;
-                //printf("reallocating memory of sequence's asci chart\n");
-                free(asciNextSeq);
-                asciNextSeq = (int *)calloc(sizeof(int), 88);
-                //printf("reallocating memory of the sequence itself\n");
-                free(newSeq);
-                newSeq = (char *) calloc(sizeof(char), wordLen);
+                for(int k = 0; k < strlen(minSeq); k++){
+                    if((int)minSeq[k] > 32){
+                        asciSeqTable[(int)minSeq[k] - 33] = 0;
+                    }
+                }
+                minSeqLength = 0;
+                minSeqIndex = 0;
+                break;
             }
-        }
-        if(lenSeq == wordLen){
-            newSeq[index] = '\0';
-            lenSeq = 0;
-            if(first == 1){
-                fprintf(outPointer,"%s", newSeq); first = 0 ;
             }
             else{
-                fprintf(outPointer,"~%s", newSeq);
+                minSeq[minSeqIndex++] = text[j];
             }
-            free(asciNextSeq);
-            asciNextSeq = (int *)calloc(sizeof(int), 143);
         }
-        nextChar = text[currentCharIndex++];
+
     }
-    free(asciNextSeq);
-    free(newSeq);
+
+    // while(nextChar != '~'){
+    //     nextCharValue = (int) nextChar;
+    //     if(minSeqLength == wordLen){
+    //         if(first == 1){
+    //             fprintf(outPointer, "%s", minSeq);
+    //             //fprintf(outPointer,"%c", nextChar);
+    //             first =0;
+    //         }
+    //         else{
+    //             fprintf(outPointer,"~%s", minSeq);
+    //             //fprintf(outPointer,"%c", nextChar);
+    //         }
+    //         minSeq[minSeqIndex] = '\0';
+    //         minSeqIndex = 0;
+    //         int curCharVal;
+    //         while(minSeq[minSeqIndex] != '\0'){
+    //             curCharVal = (int)minSeq[minSeqIndex++];
+    //             if(curCharVal > 32 && curCharVal < 126){
+    //                 asciSeqTable[curCharVal - 33] = 0;
+    //             }
+    //         }
+    //         minSeqIndex = 0;
+    //         minSeqLength = 0;
+    //     }
+    //     if(nextCharValue >= 33){
+    //     // append char to minSeq and update asci table bucket
+    //     if(asciWordTable[nextCharValue-33] > asciSeqTable[nextCharValue-33]){
+    //         minSeq[minSeqIndex++] = nextChar;
+    //         asciSeqTable[nextCharValue-33]+=1;
+    //         minSeqLength +=1;
+    //     }
+    //     // if the asci bucket is exceeding its word table asci then delete the current minSeq
+    //     // and re initialize the asci min seq table
+    //     else{
+    //         minSeq[minSeqIndex] = '\0';
+    //         //fprintf(outPointer,"%s\n", minSeq);
+    //         minSeqIndex = 0;
+    //         int curCharVal;
+    //         while(minSeq[minSeqIndex] != '\0'){
+    //             curCharVal = (int)minSeq[minSeqIndex++];
+    //             if(curCharVal > 32 && curCharVal < 126){
+    //                 asciSeqTable[curCharVal - 33]=0;
+    //             }
+    //         }
+    //         minSeqIndex = 0;
+    //         minSeqLength = 0;
+    //         //nextIndex = (nextIndex - strlen(minSeq)) + 1;
+    //     }
+    //     }
+    //     nextChar = text[nextIndex++];
+    // }
+    //fprintf(outPointer,"%d", minSeqLength);
+
     return 0;
 }
 
