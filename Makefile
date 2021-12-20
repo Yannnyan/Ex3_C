@@ -1,4 +1,5 @@
 all: stringProg
+stringProg: stringProg.o
 	gcc -Wall -g -o stringProg stringProg.o
 stringProg.o: stringProg.c
 	gcc -Wall -g -c stringProg.c stringProg.h
